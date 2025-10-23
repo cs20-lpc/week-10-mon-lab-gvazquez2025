@@ -25,16 +25,6 @@ ArrayListDictionary<Key, Val>::~ArrayListDictionary() {
 }
 
 template <typename Key, typename Val>
-Val ArrayListDictionary<Key, Val>::binSearchIter(const Key& target, int left, int right) const {
-    // TODO
-}
-
-template <typename Key, typename Val>
-Val ArrayListDictionary<Key, Val>::binSearchRec(const Key& target, int left, int right) const {
-    // TODO
-}
-
-template <typename Key, typename Val>
 void ArrayListDictionary<Key, Val>::clear() {
     list->clear();
 }
@@ -49,10 +39,12 @@ Val ArrayListDictionary<Key, Val>::find(const Key& k) const {
     numComps = 0;
 
     try {
-        return seqSearchIter(k);
-        // return seqSearchRec(k);
-        // return binSearchIter(k, 0, list->getLength() - 1);
-        // return binSearchRec(k, 0, list->getLength() - 1);
+        // Uncomment only ONE at a time to test:
+
+        //return seqSearchIter(k);                     // Sequential Iterative
+        // return seqSearchRec(k);                   // Sequential Recursive
+        // return binSearchIter(k, 0, list->getLength() - 1);  // Binary Iterative
+         return binSearchRec(k, 0, list->getLength() - 1);   // Binary Recursive
     }
     catch (...) {
         throw string("find: error, unsuccessful search, target key not found");
@@ -87,16 +79,84 @@ void ArrayListDictionary<Key, Val>::remove(const Key& k) {
 }
 
 template <typename Key, typename Val>
-Val ArrayListDictionary<Key, Val>::seqSearchIter(const Key& target) const {
-    // TODO
-}
-
-template <typename Key, typename Val>
-Val ArrayListDictionary<Key, Val>::seqSearchRec(const Key& target, int i) const {
-    // TODO
-}
-
-template <typename Key, typename Val>
 int ArrayListDictionary<Key, Val>::size() const {
     return list->getLength();
+}
+
+/* ===========================
+   SEQUENTIAL SEARCH - ITERATIVE
+   =========================== */
+template <typename Key, typename Val>
+Val ArrayListDictionary<Key, Val>::seqSearchIter(const Key& target) const {
+    int n = list->getLength();
+    for (int i = 0; i < n; i++) {
+        numComps++;
+        if (list->getElement(i).k == target) {
+            return list->getElement(i).v;
+        }
+    }
+    throw -1; // unsuccessful search
+}
+
+/* ===========================
+   SEQUENTIAL SEARCH - RECURSIVE
+   =========================== */
+template <typename Key, typename Val>
+Val ArrayListDictionary<Key, Val>::seqSearchRec(const Key& target, int i) const {
+    if (i >= list->getLength()) {
+        throw -1; // not found
+    }
+    numComps++;
+    if (list->getElement(i).k == target) {
+        return list->getElement(i).v;
+    }
+    return seqSearchRec(target, i + 1);
+}
+
+/* ===========================
+   BINARY SEARCH - ITERATIVE
+   (requires sorted data)
+   =========================== */
+template <typename Key, typename Val>
+Val ArrayListDictionary<Key, Val>::binSearchIter(const Key& target, int left, int right) const {
+    while (left <= right) {
+        int mid = (left + right) / 2;
+        Record rec = list->getElement(mid);
+        numComps++;
+        if (rec.k == target) {
+            return rec.v;
+        }
+        else if (rec.k < target) {
+            left = mid + 1;
+        }
+        else {
+            right = mid - 1;
+        }
+    }
+    throw -1; // not found
+}
+
+/* ===========================
+   BINARY SEARCH - RECURSIVE
+   (requires sorted data)
+   =========================== */
+template <typename Key, typename Val>
+Val ArrayListDictionary<Key, Val>::binSearchRec(const Key& target, int left, int right) const {
+    if (left > right) {
+        throw -1; // not found
+    }
+
+    int mid = (left + right) / 2;
+    Record rec = list->getElement(mid);
+    numComps++;
+
+    if (rec.k == target) {
+        return rec.v;
+    }
+    else if (rec.k < target) {
+        return binSearchRec(target, mid + 1, right);
+    }
+    else {
+        return binSearchRec(target, left, mid - 1);
+    }
 }
